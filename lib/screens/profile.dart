@@ -44,8 +44,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   image: const DecorationImage(
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
-                    image: NetworkImage(
-                      'https://i.pinimg.com/1200x/b1/38/b5/b138b5213ee781543c0f83d704fb7476.jpg',
+                    image: AssetImage(
+                      'ee43c703fffdbfac5a260e8372f2b2da.jpg'
                     ),
                   ),
                   color: const Color.fromARGB(255, 255, 252, 252).withValues(alpha: 128),
