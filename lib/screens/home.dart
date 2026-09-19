@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
+import '../models/country.dart';
+import '../data/favorites.dart';
 import 'detail.dart';
 
 
@@ -15,12 +17,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<Country>> countries;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
 
   @override
   void initState() {
     super.initState();
     countries = fetchCountries();
+  }
+
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
 
@@ -44,94 +55,106 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Countries')),
-      body: FutureBuilder<List<Country>>(
-        future: countries,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No countries found'));
-          }
-          
-          final list = snapshot.data!;
-          return ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (context, i) {
-              final country = list[i];
-              return Card(
-                child: ListTile(
-                  leading: country.flagsPng != null
-                      ? Image.network(country.flagsPng!, width: 50)
-                      : const SizedBox(width: 50),
-                  title: Text(country.name),
-                  subtitle: Text(country.region),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailPage(country: country),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Cari negara...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
                       ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Country>>(
+              future: countries,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No countries found'));
+                }
+
+
+                final query = _searchQuery.toLowerCase();
+                final list = snapshot.data!
+                    .where((c) => c.name.toLowerCase().contains(query))
+                    .toList();
+
+                if (list.isEmpty) {
+                  return const Center(child: Text('Negara tidak ditemukan'));
+                }
+
+                return ListenableBuilder(
+                  listenable: FavoritesStore.instance,
+                  builder: (context, _) {
+                    return ListView.builder(
+                      itemCount: list.length,
+                      itemBuilder: (context, i) {
+                        final country = list[i];
+                        final isFavorite =
+                            FavoritesStore.instance.isFavorite(country);
+                        return Card(
+                          child: ListTile(
+                            leading: country.flagsPng != null
+                                ? Image.network(country.flagsPng!, width: 50)
+                                : const SizedBox(width: 50),
+                            title: Text(country.name),
+                            subtitle: Text(country.region),
+                            trailing: IconButton(
+                              icon: Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorite ? Colors.red : null,
+                              ),
+                              onPressed: () {
+                                FavoritesStore.instance.toggle(country);
+                              },
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailPage(country: country),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     );
                   },
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-
-class Country {
-  final String name;
-  final String region;
-  final String? capital;
-  final int population;
-  final String? flagsPng;
-  final List<dynamic>? languages;
-  final List<dynamic>? currencies;
-
-
-  Country({
-    required this.name,
-    required this.region,
-    required this.population,
-    this.capital,
-    this.flagsPng,
-    this.languages,
-    this.currencies,
-  });
-
-
-  factory Country.fromJson(Map<String, dynamic> json) {
-    List<dynamic>? langs;
-    if (json['languages'] != null) {
-      langs = (json['languages'] as List)
-          .map((l) => l['name'].toString())
-          .toList();
-    }
-
-
-    List<dynamic>? cur;
-    if (json['currencies'] != null) {
-      cur = (json['currencies'] as List)
-          .map((c) => c['name'].toString())
-          .toList();
-    }
-
-
-    return Country(
-      name: json['name'] ?? 'N/A',
-      region: json['region'] ?? 'N/A',
-      population: json['population'] ?? 0,
-      capital: json['capital'],
-      flagsPng: json['flags'] != null ? json['flags']['png'] : null,
-      languages: langs,
-      currencies: cur,
     );
   }
 }

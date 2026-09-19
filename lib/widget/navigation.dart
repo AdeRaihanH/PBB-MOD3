@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/home.dart';
+import '../screens/favorites.dart';
 import '../screens/profile.dart';
 
 
@@ -27,6 +28,7 @@ class _NavigationPageState extends State<NavigationPage> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const HomePage(),
+      const FavoritesPage(),
       ProfilePage(onHomeTap: () => _onTabTapped(0)),
     ];
 
@@ -40,6 +42,10 @@ class _NavigationPageState extends State<NavigationPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorit',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

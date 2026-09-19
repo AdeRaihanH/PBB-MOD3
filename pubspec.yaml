@@ -59,7 +59,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - Meme cat.webp
+    - 3_Foto 3x4 (1).png
     - ee43c703fffdbfac5a260e8372f2b2da.jpg
 
   # To add assets to your application, add an assets section, like this:

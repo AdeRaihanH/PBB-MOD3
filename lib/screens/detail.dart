@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'home.dart';
+import '../models/country.dart';
+import '../data/favorites.dart';
 
 
 class DetailPage extends StatelessWidget {
@@ -12,7 +13,27 @@ class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(country.name)),
+      appBar: AppBar(
+        title: Text(country.name),
+        actions: [
+          ListenableBuilder(
+            listenable: FavoritesStore.instance,
+            builder: (context, _) {
+              final isFavorite = FavoritesStore.instance.isFavorite(country);
+              return IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : null,
+                ),
+                tooltip: 'Tambah ke favorit',
+                onPressed: () {
+                  FavoritesStore.instance.toggle(country);
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

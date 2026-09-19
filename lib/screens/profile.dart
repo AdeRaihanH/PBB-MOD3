@@ -64,7 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: AssetImage('Meme cat.webp'),
+                      image: AssetImage('3_Foto 3x4 (1).png'),
                     ),
                   ),
                 ),
