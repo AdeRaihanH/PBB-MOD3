@@ -15,7 +15,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final List<Map<String, String>> teamMembers = [
-    {'Nama': 'Rayvan Bayu Abhinowo', 'NIM': '21120123130053'},
+    {'Nama': 'Ade Raihan Hanafi', 'NIM': '21120124140118'},
   ];
 
 
@@ -64,9 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: NetworkImage(
-                        'https://avatars.githubusercontent.com/rayvanbayu77',
-                      ),
+                      image: AssetImage('Meme cat.webp'),
                     ),
                   ),
                 ),
